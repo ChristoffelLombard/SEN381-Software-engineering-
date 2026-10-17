@@ -1,16 +1,20 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 
 namespace DataAccess
 {
     public static class DatabaseConnection
     {
-        // Update connection string if using a named SQL instance or custom credentials
-        private static readonly string _connectionString =
+        private const string DefaultConnectionString =
             @"Server=(localdb)\MSSQLLocalDB;Database=CityMakerspaceDB;Integrated Security=True;";
+
+        private static string ConnectionString =>
+            Environment.GetEnvironmentVariable("CIVICCONNECT_DB_CONN")
+            ?? DefaultConnectionString;
 
         public static SqlConnection GetConnection()
         {
-            return new SqlConnection(_connectionString);
+            return new SqlConnection(ConnectionString);
         }
     }
 }

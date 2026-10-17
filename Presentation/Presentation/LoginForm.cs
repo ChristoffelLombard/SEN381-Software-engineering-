@@ -31,10 +31,10 @@ namespace Presentation
 
             Label lblTitle = new Label { Text = "Makerspace Portal Login", Font = new Font("Segoe UI", 12, FontStyle.Bold), Location = new Point(30, 20), AutoSize = true };
             Label lblUser = new Label { Text = "Username:", Location = new Point(30, 60), AutoSize = true };
-            txtUsername = new TextBox { Location = new Point(120, 57), Width = 200, Text = "admin" };
+            txtUsername = new TextBox { Location = new Point(120, 57), Width = 200 };
 
             Label lblPass = new Label { Text = "Password:", Location = new Point(30, 100), AutoSize = true };
-            txtPassword = new TextBox { Location = new Point(120, 97), Width = 200, PasswordChar = '*', Text = "admin123" };
+            txtPassword = new TextBox { Location = new Point(120, 97), Width = 200, PasswordChar = '*' };
 
             btnLogin = new Button { Text = "Login", Location = new Point(120, 135), Width = 200, Height = 32, BackColor = Color.DodgerBlue, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
             btnLogin.Click += BtnLogin_Click;

@@ -44,7 +44,7 @@ namespace BusinessLogic
                 Location = location.Trim(),
                 Description = description ?? "",
                 Priority = string.IsNullOrWhiteSpace(priority) ? "Medium" : priority,
-                Status = "Submitted", // Default lifecycle state
+                Status = "Submitted",
                 DateCreated = DateTime.Now,
                 LastModifiedBy = currentUser ?? "System"
             };
@@ -52,8 +52,6 @@ namespace BusinessLogic
             bool added = _requestRepository.AddRequest(request);
             if (!added) return null;
 
-            // Attempt to locate the newly created request in the repository.
-            // We use a best-effort strategy: match by title and location and take the most recently created.
             var all = _requestRepository.GetAllRequests();
             ServiceRequest created = all.FindLast(r => r.Title == request.Title && r.Location == request.Location);
             return created;
@@ -66,7 +64,7 @@ namespace BusinessLogic
             return all.Find(r => r.RequestID == id);
         }
 
-        // M2 Design Pattern Implementation: Lifecycle State Control Strategy
+        // Controlled lifecycle transition service.
         public bool AdvanceRequestStatus(int requestId, string currentStatus, string targetStatus, string currentUser)
         {
             if (requestId <= 0)
@@ -75,7 +73,6 @@ namespace BusinessLogic
                 throw new ArgumentException("Invalid service request selected.");
             }
 
-            // Verify the request exists
             var existing = GetRequestById(requestId);
             if (existing == null)
             {
@@ -83,7 +80,6 @@ namespace BusinessLogic
                 throw new ArgumentException("Service request not found.");
             }
 
-            // Enforce valid lifecycle state progression rules
             if (!IsValidStateTransition(currentStatus, targetStatus))
             {
                 ErrorHandler.LogWarning($"Invalid state transition attempted for requestId={requestId} from '{currentStatus}' to '{targetStatus}' (user={currentUser})");
@@ -115,18 +111,16 @@ namespace BusinessLogic
         {
             if (current == target) return false;
 
-            // Define Business State Transition Rules
             return current switch
             {
-                "Submitted" => target == "In Progress" || target == "Closed",
+                "Submitted" => target == "In Progress",
                 "In Progress" => target == "Resolved",
-                "Resolved" => target == "Closed" || target == "In Progress", // Can reopen if unresolved
-                "Closed" => false, // Terminal state
+                "Resolved" => target == "Closed" || target == "In Progress",
+                "Closed" => false,
                 _ => false
             };
         }
 
-        // Dynamic Aggregation Metrics for Dashboard Header
         public (int Total, int Pending, int InProgress, int Resolved) GetDashboardMetrics()
         {
             List<ServiceRequest> all = _requestRepository.GetAllRequests();
